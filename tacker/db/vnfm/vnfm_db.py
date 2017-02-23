@@ -19,6 +19,7 @@ import uuid
 from oslo_log import log as logging
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
+from oslo_config import cfg
 
 import sqlalchemy as sa
 from sqlalchemy import orm
@@ -126,7 +127,7 @@ class VNF(model_base.BASE, models_v1.HasId, models_v1.HasTenant,
     placement_attr = sa.Column(types.Json, nullable=True)
     vim = orm.relationship('Vim')
     error_reason = sa.Column(sa.Text, nullable=True)
-
+    server_id = sa.Column(types.Uuid, nullable=True)
 
 class VNFAttribute(model_base.BASE, models_v1.HasId):
     """Represents kwargs necessary for spinning up VM in (key, value) pair.
@@ -205,7 +206,7 @@ class VNFMPluginDb(vnfm.VNFMPluginBase, db_base.CommonDbMixin):
         }
         key_list = ('id', 'tenant_id', 'name', 'description', 'instance_id',
                     'vim_id', 'placement_attr', 'vnfd_id', 'status',
-                    'mgmt_url', 'error_reason', 'created_at', 'updated_at')
+                    'mgmt_url', 'error_reason', 'created_at', 'updated_at', 'server_id')
         res.update((key, vnf_db[key]) for key in key_list)
         return self._fields(res, fields)
 
@@ -383,7 +384,8 @@ class VNFMPluginDb(vnfm.VNFMPluginBase, db_base.CommonDbMixin):
                          vim_id=vim_id,
                          placement_attr=placement_attr,
                          status=constants.PENDING_CREATE,
-                         error_reason=None)
+                         error_reason=None,
+                         server_id=cfg.CONF.uuid)
             context.session.add(vnf_db)
             for key, value in attributes.items():
                     arg = VNFAttribute(
