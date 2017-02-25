@@ -10,6 +10,10 @@ from tacker.common import exceptions
 from tacker.plugins.common import constants
 from tacker.services import service_base
 
+class ServerNotFoundException(exceptions.TackerException):
+    message = _("Specified server id %(server_id)s is invalid. Please verify and "
+                "pass a valid VIM id")
+
 class Server(extensions.ExtensionDescriptor):
     @classmethod
     def get_name(cls):

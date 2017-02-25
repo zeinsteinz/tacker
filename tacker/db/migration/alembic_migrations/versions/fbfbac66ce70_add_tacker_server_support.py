@@ -33,16 +33,18 @@ from tacker.db import migration
 from tacker.db import types
 
 def upgrade(active_plugins=None, options=None):
-    op.add_column('vnf', sa.Column('server_id', types.Uuid(length=36), nullable=True))
+    op.add_column('vnf', sa.Column('server_id', types.Uuid(length=36), nullable=False))
 
     op.create_table(
         'server',
         sa.Column('id', sa.String(length=36), nullable=False),
-        sa.Column('is_active', sa.BOOLEAN(), nullable=False),
+        sa.Column('status', sa.String(length=255), nullable=True),
+        sa.Column('role', sa.String(length=255), nullable=True),
         sa.Column('description', sa.String(length=255), nullable=True),
-        sa.Column('type', sa.String(length=255), nullable=True),
-        sa.Column('name', sa.String(length=255), nullable=True),
-        sa.Column('last_update', sa.DateTime(), nullable=False),
+        sa.Column('updated_at', sa.DateTime(), nullable=False),
+        sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
         mysql_engine='InnoDB'
     )
+
+    op.create_foreign_key("fk_server_id", "vnf", "server", ["server_id"], ["id"])

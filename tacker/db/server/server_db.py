@@ -31,7 +31,7 @@ from tacker.db import model_base
 from tacker.db import models_v1
 from tacker.db import types
 from tacker.db.vnfm import vnfm_db
-from tacker.extensions import nfvo
+from tacker.extensions import server
 from tacker import manager
 from tacker.plugins.common import constants
 from tacker.services import service_base
@@ -42,12 +42,11 @@ CONF = cfg.CONF
 class Server(model_base.BASE,
           models_v1.HasId):
     __tablename__ = 'server'
-    is_active = sa.Column(sa.Boolean, default=True, server_default=sql.true(
-    ), nullable=False)
+    status = sa.Column(sa.String(255), nullable=True)
+    role = sa.Column(sa.String(255), nullable=True)
     description = sa.Column(sa.Text, nullable=True)
-    type = sa.Column(sa.String(64), nullable=True)
-    name = sa.Column(sa.String(255), nullable=True)
-    last_update = sa.Column(sa.DateTime(), nullable=False)
+    updated_at = sa.Column(sa.DateTime(), nullable=False)
+    created_at = sa.Column(sa.DateTime(), nullable=False)
 
 class ServerPluginDb(service_base.NFVPluginBase, db_base.CommonDbMixin):
     def __init__(self):
@@ -59,62 +58,54 @@ class ServerPluginDb(service_base.NFVPluginBase, db_base.CommonDbMixin):
         return manager.TackerManager.get_plugin()
 
     def _make_server_dict(self, server_db, fields=None):
-        key_list = ('id', 'is_active', 'description', 'type', 'name',
-                    'last_update')
+        key_list = ('id', 'status', 'role', 'description', 'updated_at', 'created_at')
         res = dict((key, server_db[key]) for key in key_list)
         return self._fields(res, fields)
 
+    def _get_resource(self, context, model, id):
+        try:
+            return self._get_by_id(context, model, id)
+        except orm_exc.NoResultFound:
+            if issubclass(model, Server):
+                raise server.ServerNotFoundException(server_id=id)
+            else:
+                raise
+
+    def _get_by_id(self, context, model, id):
+        query = self._model_query(context, model)
+        return query.filter(model.id == id).one()
+
     def create_server(self, context):
         with context.session.begin(subtransactions=True):
-            cfg.CONF.uuid = uuid.uuid4()
+            cfg.CONF.uuid = str(uuid.uuid4())
             server_db = Server(
-                id=str(cfg.CONF.uuid),
-                is_active=True,
-                description="",
-                type="default",
-                name="",
-                last_update=timeutils.utcnow())
+                id=cfg.CONF.uuid,
+                status="active",
+                role="normal",
+                description="http://" + cfg.CONF.bind_host + ":" + str(cfg.CONF.bind_port),
+                updated_at=timeutils.utcnow(),
+                created_at=timeutils.utcnow())
             context.session.add(server_db)
+        LOG.debug("Server item is created in DB")
         server_dict = self._make_server_dict(server_db)
         return server_dict
 
-    # def delete_server(self, context, vim_id, soft_delete=True):
-    #     with context.session.begin(subtransactions=True):
-    #         vim_db = self._get_resource(context, Vim, vim_id)
-    #         if soft_delete:
-    #             vim_db.update({'deleted_at': timeutils.utcnow()})
-    #             self._cos_db_plg.create_event(
-    #                 context, res_id=vim_db['id'],
-    #                 res_type=constants.RES_TYPE_VIM,
-    #                 res_state=vim_db['status'],
-    #                 evt_type=constants.RES_EVT_DELETE,
-    #                 tstamp=vim_db[constants.RES_EVT_DELETED_FLD])
-    #         else:
-    #             context.session.query(VimAuth).filter_by(
-    #                 vim_id=vim_id).delete()
-    #             context.session.delete(vim_db)
-    #
-    # def update_server(self, context, vim_id, vim):
-    #     self._validate_default_vim(context, vim, vim_id=vim_id)
-    #     with context.session.begin(subtransactions=True):
-    #         vim_cred = vim['auth_cred']
-    #         vim_project = vim['vim_project']
-    #         is_default = vim.get('is_default')
-    #         vim_db = self._get_resource(context, Vim, vim_id)
-    #         try:
-    #             if is_default:
-    #                 vim_db.update({'is_default': is_default})
-    #             vim_auth_db = (self._model_query(context, VimAuth).filter(
-    #                 VimAuth.vim_id == vim_id).with_lockmode('update').one())
-    #         except orm_exc.NoResultFound:
-    #                 raise nfvo.VimNotFoundException(vim_id=vim_id)
-    #         vim_auth_db.update({'auth_cred': vim_cred, 'password':
-    #                            vim_cred.pop('password'), 'vim_project':
-    #                            vim_project})
-    #         vim_db.update({'updated_at': timeutils.utcnow()})
-    #         self._cos_db_plg.create_event(
-    #             context, res_id=vim_db['id'],
-    #             res_type=constants.RES_TYPE_VIM,
-    #             res_state=vim_db['status'],
-    #             evt_type=constants.RES_EVT_UPDATE,
-    #             tstamp=vim_db[constants.RES_EVT_UPDATED_FLD])
+    def update_server(self, context, server_id, server=None):
+        with context.session.begin(subtransactions=True):
+            server_db = self._get_resource(context, Server, server_id)
+            if server:
+                server_db.update({'status': server['status']})
+                server_db.update({'role': server['role']})
+                server_db.update({'description': server['description']})
+            server_db.update({'updated_at': timeutils.utcnow()})
+        server_dict = self._make_server_dict(server_db)
+        return server_dict
+
+    def delete_server(self, context, server_id):
+        with context.session.begin(subtransactions=True):
+            server_db = self._get_resource(context, Server, server_id)
+            context.session.delete(server_db)
+
+    def get_servers(self, context, filters=None, fields=None):
+        return self._get_collection(context, Server, self._make_server_dict,
+                                    filters=filters, fields=fields)
