@@ -80,7 +80,7 @@ vnffgd_id_path:
 alias:
   description: |
     The alias for the extension. For example,
-    "Commonservices", "NFVO" or "VNFM".
+    "Commonservices", "server", ""NFVO" or "VNFM".
   in: body
   required: true
   type: string
