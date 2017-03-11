@@ -18,6 +18,7 @@ Routines for configuring Tacker
 """
 
 import os
+import uuid
 
 from oslo_config import cfg
 from oslo_db import options as db_options
@@ -40,7 +41,7 @@ core_opts = [
                help=_("The API paste config file to use")),
     cfg.StrOpt('api_extensions_path', default="",
                help=_("The path for API extensions")),
-    cfg.ListOpt('service_plugins', default=['nfvo', 'vnfm'],
+    cfg.ListOpt('service_plugins', default=['nfvo', 'vnfm', 'server'],
                 help=_("The service plugins Tacker will use")),
     cfg.StrOpt('policy_file', default="policy.json",
                help=_("The policy file to use")),
@@ -58,6 +59,8 @@ core_opts = [
                       "means no limit")),
     cfg.StrOpt('host', default=utils.get_hostname(),
                help=_("The hostname Tacker is running on")),
+    cfg.StrOpt('uuid', default='00000000-0000-0000-0000-000000000000',
+               help=_("The uuid of running Tacker")),
 ]
 
 core_cli_opts = [

@@ -18,6 +18,7 @@ CORE = "CORE"
 DUMMY = "DUMMY"
 VNFM = "VNFM"
 NFVO = "NFVO"
+SERVER = "SERVER"
 COMMONSERVICES = "COMMONSERVICES"
 
 COMMON_PREFIXES = {
@@ -25,6 +26,7 @@ COMMON_PREFIXES = {
     DUMMY: "/dummy_svc",
     VNFM: "",
     NFVO: "",
+    SERVER: "",
     COMMONSERVICES: ""
 }
 
@@ -60,6 +62,7 @@ RES_TYPE_NSD = "nsd"
 RES_TYPE_NS = "ns"
 RES_TYPE_VNF = "vnf"
 RES_TYPE_VIM = "vim"
+RES_TYPE_SERVER = "server"
 
 RES_EVT_CREATE = "CREATE"
 RES_EVT_DELETE = "DELETE"
