@@ -157,7 +157,7 @@ class ServerMonitor(object):
     def handleOrphanVnfs(self):
         active_servers = self.getServerPlugin().get_servers(self.context, {"status": [STATUS_ACTIVE]})
         id_set = set(s["id"] for s in active_servers)
-        vnfs = self.getVnfmPlugin().get_vnfs(self.context, {"name": "test"})
+        vnfs = self.getVnfmPlugin().get_vnfs(self.context)
         LOG.debug("Total number of active vnfs: {0}".format(len(vnfs)))
         selected_server = random.choice(active_servers)
         for vnf in vnfs:
@@ -165,7 +165,7 @@ class ServerMonitor(object):
             if vnf["server_id"] not in id_set:
                 LOG.debug("vnf {0} is an orphan".format(vnf["id"]))
                 vnf["server_id"] = selected_server["id"]
-                self.getVnfmPlugin().update_vnf(self.context, vnf["id"], vnf)
+                self.getVnfmPlugin().set_vnf_server_id(self.context, vnf["id"], selected_server["id"])
                 LOG.debug("rebind vnf {0} to server {1}".format(vnf["id"], selected_server["id"]))
         self.getServerPlugin().update_server(self.context, selected_server["id"], selected_server)
 

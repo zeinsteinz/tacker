@@ -614,6 +614,12 @@ class VNFMPluginDb(vnfm.VNFMPluginBase, db_base.CommonDbMixin):
                 filter(VNF.id == vnf_id).
                 update({'error_reason': new_reason}))
 
+    def set_vnf_server_id(self, context, vnf_id, server_id):
+        with context.session.begin(subtransactions=True):
+            (self._model_query(context, VNF).
+                filter(VNF.id == vnf_id).
+                update({'server_id': server_id}))
+
     def _mark_vnf_status(self, vnf_id, exclude_status, new_status):
         context = t_context.get_admin_context()
         with context.session.begin(subtransactions=True):

@@ -405,10 +405,10 @@ function tacker_register_default_vim {
     sed -e "s|^auth_url:.*$|auth_url: \'${KEYSTONE_SERVICE_URI}\'|" -i $VIM_CONFIG_FILE
     echo "The content of VIM config file $VIM_CONFIG_FILE :"
     cat $VIM_CONFIG_FILE
-    local default_vim_id
-    DEFAULT_VIM_NAME="VIM0"
-    default_vim_id=$(tacker vim-register --is-default --description "Default VIM" --config-file $VIM_CONFIG_FILE $DEFAULT_VIM_NAME -c id | grep id | awk '{print $4}')
-    echo "Default VIM registration done as $default_vim_id at $KEYSTONE_SERVICE_URI."
+    #local default_vim_id
+    #DEFAULT_VIM_NAME="VIM0"
+    #default_vim_id=$(tacker vim-register --is-default --description "Default VIM" --config-file $VIM_CONFIG_FILE $DEFAULT_VIM_NAME -c id | grep id | awk '{print $4}')
+    #echo "Default VIM registration done as $default_vim_id at $KEYSTONE_SERVICE_URI."
 }
 
 function modify_heat_flavor_policy_rule {

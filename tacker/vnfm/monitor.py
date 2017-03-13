@@ -101,7 +101,7 @@ class VNFMonitor(object):
                     if hosting_vnf.get('dead', False):
                         LOG.debug('monitor skips dead vnf %s', hosting_vnf)
                         continue
-
+                    LOG.debug("show hosting vnf %s", hosting_vnf)
                     self.run_monitor(hosting_vnf)
 
     @staticmethod
