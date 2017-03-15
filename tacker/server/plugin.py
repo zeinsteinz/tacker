@@ -56,7 +56,9 @@ class ServerPlugin(server_db.ServerPluginDb):
         server_res = super(ServerPlugin, self).create_server(self.context)
         LOG.debug("Tacker server uuid {0}".format(cfg.CONF.uuid))
         self.update_interval = cfg.CONF.tacker_server.update_interval
-        threading.Thread(target=self.__run__).start()
+        t = threading.Thread(target=self.__run__)
+        t.daemon = True
+        t.start()
         self._server_monitor = ServerMonitor()
 
     def __run__(self):
@@ -98,7 +100,9 @@ class ServerMonitor(object):
         LOG.debug('Spawning server monitor thread')
         self.context = t_context.get_admin_context()
         self.is_head = False
-        threading.Thread(target=self.__run__).start()
+        t = threading.Thread(target=self.__run__)
+        t.daemon = True
+        t.start()
 
     def getServerPlugin(self):
         if not self._server_plugin:
