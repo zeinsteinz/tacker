@@ -64,7 +64,7 @@ class ServerPlugin(server_db.ServerPluginDb):
     def __run__(self):
         while(1):
             time.sleep(self.update_interval)
-            LOG.debug("Update server status")
+            #LOG.debug("Update server status")
             super(ServerPlugin, self).update_server(self.context, cfg.CONF.uuid)
 
     def get_plugin_name(self):
@@ -165,7 +165,7 @@ class ServerMonitor(object):
         LOG.debug("Total number of active vnfs: {0}".format(len(vnfs)))
         selected_server = random.choice(active_servers)
         for vnf in vnfs:
-            LOG.debug("checking status of vnf {0}".format(vnf["id"]))
+            #LOG.debug("checking status of vnf {0}".format(vnf["id"]))
             if vnf["server_id"] not in id_set:
                 LOG.debug("vnf {0} is an orphan".format(vnf["id"]))
                 vnf["server_id"] = selected_server["id"]
