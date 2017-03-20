@@ -109,3 +109,9 @@ class ServerPluginDb(service_base.NFVPluginBase, db_base.CommonDbMixin):
     def get_servers(self, context, filters=None, fields=None):
         return self._get_collection(context, Server, self._make_server_dict,
                                     filters=filters, fields=fields)
+
+    def get_server_by_id(self, context, server_id):
+        with context.session.begin(subtransactions=True):
+            server_db = self._get_resource(context, Server, server_id)
+        server_dict = self._make_server_dict(server_db)
+        return server_dict

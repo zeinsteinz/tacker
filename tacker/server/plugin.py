@@ -65,7 +65,9 @@ class ServerPlugin(server_db.ServerPluginDb):
         while(1):
             time.sleep(self.update_interval)
             #LOG.debug("Update server status")
-            super(ServerPlugin, self).update_server(self.context, cfg.CONF.uuid)
+            server_dict = super(ServerPlugin, self).get_server_by_id(self.context, cfg.CONF.uuid)
+            server_dict["status"] = STATUS_ACTIVE
+            super(ServerPlugin, self).update_server(self.context, cfg.CONF.uuid, server_dict)
 
     def get_plugin_name(self):
         return constants.SERVER
