@@ -3,6 +3,7 @@ import threading
 import time
 import uuid
 import random
+import traceback
 
 from cryptography import fernet
 from oslo_config import cfg
@@ -120,14 +121,17 @@ class ServerMonitor(object):
         while(1):
             time.sleep(cfg.CONF.server_monitor.check_interval)
             with self._lock:
-                server_dict = self.getServerPlugin().get_servers(self.context, {"status": [STATUS_ACTIVE]})
-                LOG.debug('Total number of active servers: {0}'.format(len(server_dict)))
-                if not self.is_head:
-                    self.is_head = self.can_be_head(server_dict)
-                for server in server_dict:
-                    self.checkServer(server)
-                if self.is_head:
-                    self.handleOrphanVnfs()
+                try:
+                    server_dict = self.getServerPlugin().get_servers(self.context, {"status": [STATUS_ACTIVE]})
+                    LOG.debug('Total number of active servers: {0}'.format(len(server_dict)))
+                    if not self.is_head:
+                        self.is_head = self.can_be_head(server_dict)
+                    for server in server_dict:
+                        self.checkServer(server)
+                    if self.is_head:
+                        self.handleOrphanVnfs()
+                except Exception, err:
+                    LOG.debug(traceback.format_exc())
 
 
     def can_be_head(self, server_dict):
