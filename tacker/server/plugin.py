@@ -124,8 +124,7 @@ class ServerMonitor(object):
                 try:
                     server_dict = self.getServerPlugin().get_servers(self.context, {"status": [STATUS_ACTIVE]})
                     LOG.debug('Total number of active servers: {0}'.format(len(server_dict)))
-                    if not self.is_head:
-                        self.is_head = self.can_be_head(server_dict)
+                    self.is_head = self.can_be_head(server_dict)
                     for server in server_dict:
                         self.checkServer(server)
                     if self.is_head:
@@ -141,6 +140,12 @@ class ServerMonitor(object):
             first_active["role"] = ROLE_HEAD
             self.getServerPlugin().update_server(self.context, cfg.CONF.uuid, first_active)
             return True
+        if first_active["id"] != cfg.CONF.uuid and first_active["role"] == ROLE_HEAD:
+            LOG.debug("set server {0} as normal".format(cfg.CONF.uuid))
+            local_dict = self.getServerPlugin().get_server_by_id(self.context, cfg.CONF.uuid)
+            local_dict["role"] = ROLE_NORMAL
+            self.getServerPlugin().update_server(self.context, cfg.CONF.uuid, local_dict)
+            return False
         return False
 
     def checkServer(self, server):
