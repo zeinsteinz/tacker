@@ -140,7 +140,7 @@ class ServerMonitor(object):
             first_active["role"] = ROLE_HEAD
             self.getServerPlugin().update_server(self.context, cfg.CONF.uuid, first_active)
             return True
-        if first_active["id"] != cfg.CONF.uuid and first_active["role"] == ROLE_HEAD:
+        if first_active["id"] != cfg.CONF.uuid and self.is_head == True:
             LOG.debug("set server {0} as normal".format(cfg.CONF.uuid))
             local_dict = self.getServerPlugin().get_server_by_id(self.context, cfg.CONF.uuid)
             local_dict["role"] = ROLE_NORMAL
