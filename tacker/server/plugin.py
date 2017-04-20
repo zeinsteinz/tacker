@@ -135,16 +135,18 @@ class ServerMonitor(object):
 
     def can_be_head(self, server_dict):
         first_active = min(server_dict, key=lambda s: s["created_at"])
-        if first_active["id"] == cfg.CONF.uuid and first_active["role"] != ROLE_HEAD:
-            LOG.debug("set server {0} as head".format(first_active["id"]))
-            first_active["role"] = ROLE_HEAD
-            self.getServerPlugin().update_server(self.context, cfg.CONF.uuid, first_active)
+        if first_active["id"] == cfg.CONF.uuid:
+            if first_active["role"] != ROLE_HEAD:
+                LOG.debug("set server {0} as head".format(first_active["id"]))
+                first_active["role"] = ROLE_HEAD
+                self.getServerPlugin().update_server(self.context, cfg.CONF.uuid, first_active)
             return True
-        if first_active["id"] != cfg.CONF.uuid and self.is_head == True:
-            LOG.debug("set server {0} as normal".format(cfg.CONF.uuid))
-            local_dict = self.getServerPlugin().get_server_by_id(self.context, cfg.CONF.uuid)
-            local_dict["role"] = ROLE_NORMAL
-            self.getServerPlugin().update_server(self.context, cfg.CONF.uuid, local_dict)
+        if first_active["id"] != cfg.CONF.uuid:
+            if self.is_head == True:
+                LOG.debug("set server {0} as normal".format(cfg.CONF.uuid))
+                local_dict = self.getServerPlugin().get_server_by_id(self.context, cfg.CONF.uuid)
+                local_dict["role"] = ROLE_NORMAL
+                self.getServerPlugin().update_server(self.context, cfg.CONF.uuid, local_dict)
             return False
         return False
 
