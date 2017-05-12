@@ -33,8 +33,8 @@ from tacker import version
 LOG = logging.getLogger(__name__)
 
 core_opts = [
-    cfg.StrOpt('bind_host', default='0.0.0.0',
-               help=_("The host IP to bind to")),
+    cfg.HostAddressOpt('bind_host', default='0.0.0.0',
+                       help=_("The host IP to bind to")),
     cfg.IntOpt('bind_port', default=9890,
                help=_("The port to bind to")),
     cfg.StrOpt('api_paste_config', default="api-paste.ini",
@@ -54,20 +54,21 @@ core_opts = [
     cfg.BoolOpt('allow_sorting', default=False,
                 help=_("Allow the usage of the sorting")),
     cfg.StrOpt('pagination_max_limit', default="-1",
-               help=_("The maximum number of items returned in a single "
-                      "response, value was 'infinite' or negative integer "
-                      "means no limit")),
-    cfg.StrOpt('host', default=utils.get_hostname(),
-               help=_("The hostname Tacker is running on")),
+               help=_("The maximum number of items returned "
+                      "in a single response, value was 'infinite' "
+                      "or negative integer means no limit")),
     cfg.StrOpt('uuid', default='00000000-0000-0000-0000-000000000000',
                help=_("The uuid of running Tacker")),
+    cfg.HostAddressOpt('host', default=utils.get_hostname(),
+                       help=_("The hostname Tacker is running on")),
 ]
 
 core_cli_opts = [
     cfg.StrOpt('state_path',
                default='/var/lib/tacker',
                help=_("Where to store Tacker state files. "
-                      "This directory must be writable by the agent.")),
+                      "This directory must be writable by "
+                      "the agent.")),
 ]
 
 logging.register_options(cfg.CONF)
@@ -120,8 +121,8 @@ def load_paste_app(app_name):
     """Builds and returns a WSGI app from a paste config file.
 
     :param app_name: Name of the application to load
-    :raises ConfigFilesNotFoundError when config file cannot be located
-    :raises RuntimeError when application cannot be loaded from config file
+    :raises ConfigFilesNotFoundError: when config file cannot be located
+    :raises RuntimeError: when application cannot be loaded from config file
     """
 
     config_path = cfg.CONF.find_file(cfg.CONF.api_paste_config)

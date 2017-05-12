@@ -29,7 +29,7 @@ from neutronclient.v2_0 import client as neutron_client
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from tacker._i18n import _LW, _
+from tacker._i18n import _
 from tacker.agent.linux import utils as linux_utils
 from tacker.common import log
 from tacker.extensions import nfvo
@@ -58,7 +58,9 @@ cfg.CONF.register_opts(OPTS, 'vim_keys')
 cfg.CONF.register_opts(OPENSTACK_OPTS, 'vim_monitor')
 
 _VALID_RESOURCE_TYPES = {'network': {'client': neutron_client.Client,
-                                     'cmd': 'list_'
+                                     'cmd': 'list_networks',
+                                     'vim_res_name': 'networks',
+                                     'filter_attr': 'name'
                                      }
                          }
 
@@ -252,7 +254,7 @@ class OpenStack_Driver(abstract_vim_driver.VimAbstractDriver,
             linux_utils.execute(ping_cmd, check_exit_code=True)
             return True
         except RuntimeError:
-            LOG.warning(_LW("Cannot ping ip address: %s"), vim_ip)
+            LOG.warning("Cannot ping ip address: %s", vim_ip)
             return False
 
     @log.log
@@ -265,21 +267,34 @@ class OpenStack_Driver(abstract_vim_driver.VimAbstractDriver,
         :return: ID of resource
         """
         if resource_type in _VALID_RESOURCE_TYPES.keys():
-            client_type = _VALID_RESOURCE_TYPES[resource_type]['client']
-            cmd_prefix = _VALID_RESOURCE_TYPES[resource_type]['cmd']
+            res_cmd_map = _VALID_RESOURCE_TYPES[resource_type]
+            client_type = res_cmd_map['client']
+            cmd = res_cmd_map['cmd']
+            filter_attr = res_cmd_map.get('filter_attr')
+            vim_res_name = res_cmd_map['vim_res_name']
         else:
             raise nfvo.VimUnsupportedResourceTypeException(type=resource_type)
 
         client = self._get_client(vim_obj, client_type)
-        cmd = str(cmd_prefix) + str(resource_name)
+        cmd_args = {}
+        if filter_attr:
+            cmd_args[filter_attr] = resource_name
+
         try:
-            resources = getattr(client, "%s" % cmd)()
+            resources = getattr(client, "%s" % cmd)(**cmd_args)[vim_res_name]
             LOG.debug(_('resources output %s'), resources)
-            for resource in resources[resource_type]:
-                if resource['name'] == resource_name:
-                    return resource['id']
         except Exception:
-            raise nfvo.VimGetResourceException(cmd=cmd, type=resource_type)
+            raise nfvo.VimGetResourceException(
+                cmd=cmd, name=resource_name, type=resource_type)
+
+        if len(resources) > 1:
+            raise nfvo.VimGetResourceNameNotUnique(
+                cmd=cmd, name=resource_name)
+        elif len(resources) < 1:
+            raise nfvo.VimGetResourceNotFoundException(
+                cmd=cmd, name=resource_name)
+
+        return resources[0]['id']
 
     @log.log
     def _get_client(self, vim_obj, client_type):
@@ -456,63 +471,44 @@ class OpenStack_Driver(abstract_vim_driver.VimAbstractDriver,
         neutronclient_ = NeutronClient(auth_attr)
         neutronclient_.flow_classifier_delete(fc_id)
 
-    def prepare_and_create_workflow(self, resource, action, vim_auth,
-                                    kwargs, auth_token=None):
-        if not auth_token:
-            LOG.warning(_("auth token required to create mistral workflows"))
-            raise EnvironmentError('auth token required for'
+    def get_mistral_client(self, auth_dict):
+        if not auth_dict:
+            LOG.warning(_("auth dict required to instantiate mistral client"))
+            raise EnvironmentError('auth dict required for'
                                    ' mistral workflow driver')
-        mistral_client = MistralClient(
-            self.keystone.initialize_client('2', **vim_auth),
-            auth_token).get_client()
+        return MistralClient(
+            keystone.Keystone().initialize_client('2', **auth_dict),
+            auth_dict['token']).get_client()
+
+    def prepare_and_create_workflow(self, resource, action,
+                                    kwargs, auth_dict=None):
+        mistral_client = self.get_mistral_client(auth_dict)
         wg = workflow_generator.WorkflowGenerator(resource, action)
         wg.task(**kwargs)
-        definition_yaml = yaml.dump(wg.definition)
+        if not wg.get_tasks():
+            raise nfvo.NoTasksException(resource=resource, action=action)
+        definition_yaml = yaml.safe_dump(wg.definition)
         workflow = mistral_client.workflows.create(definition_yaml)
         return {'id': workflow[0].id, 'input': wg.get_input_dict()}
 
-    def execute_workflow(self, workflow, vim_auth, auth_token=None):
-        if not auth_token:
-            LOG.warning(_("auth token required to create mistral workflows"))
-            raise EnvironmentError('auth token required for'
-                                   ' mistral workflow driver')
-        mistral_client = MistralClient(
-            self.keystone.initialize_client('2', **vim_auth),
-            auth_token).get_client()
-        return mistral_client.executions.create(
-            workflow_identifier=workflow['id'],
-            workflow_input=workflow['input'],
-            wf_params={})
+    def execute_workflow(self, workflow, auth_dict=None):
+        return self.get_mistral_client(auth_dict)\
+            .executions.create(
+                workflow_identifier=workflow['id'],
+                workflow_input=workflow['input'],
+                wf_params={})
 
-    def get_execution(self, execution_id, vim_auth, auth_token=None):
-        if not auth_token:
-            LOG.warning(_("auth token required to create mistral workflows"))
-            raise EnvironmentError('auth token required for'
-                                   ' mistral workflow driver')
-        mistral_client = MistralClient(
-            self.keystone.initialize_client('2', **vim_auth),
-            auth_token).get_client()
-        return mistral_client.executions.get(execution_id)
+    def get_execution(self, execution_id, auth_dict=None):
+        return self.get_mistral_client(auth_dict)\
+            .executions.get(execution_id)
 
-    def delete_execution(self, execution_id, vim_auth, auth_token=None):
-        if not auth_token:
-            LOG.warning(_("auth token required to create mistral workflows"))
-            raise EnvironmentError('auth token required for'
-                                   ' mistral workflow driver')
-        mistral_client = MistralClient(
-            self.keystone.initialize_client('2', **vim_auth),
-            auth_token).get_client()
-        return mistral_client.executions.delete(execution_id)
+    def delete_execution(self, execution_id, auth_dict=None):
+        return self.get_mistral_client(auth_dict).executions\
+            .delete(execution_id)
 
-    def delete_workflow(self, workflow_id, vim_auth, auth_token=None):
-        if not auth_token:
-            LOG.warning(_("auth token required to create mistral workflows"))
-            raise EnvironmentError('auth token required for'
-                                   ' mistral workflow driver')
-        mistral_client = MistralClient(
-            self.keystone.initialize_client('2', **vim_auth),
-            auth_token).get_client()
-        return mistral_client.workflows.delete(workflow_id)
+    def delete_workflow(self, workflow_id, auth_dict=None):
+        return self.get_mistral_client(auth_dict)\
+            .workflows.delete(workflow_id)
 
 
 class MistralClient(object):
@@ -521,8 +517,9 @@ class MistralClient(object):
     def __init__(self, keystone, auth_token):
         endpoint = keystone.session.get_endpoint(
             service_type='workflowv2', region_name=None)
+
         self.client = mistral_client.client(auth_token=auth_token,
-                                     mistral_url=endpoint)
+            mistral_url=endpoint)
 
     def get_client(self):
         return self.client

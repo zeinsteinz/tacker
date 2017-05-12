@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import unittest
 import yaml
 
 from novaclient import exceptions
@@ -50,7 +51,7 @@ class VnfTestToscaCreate(base.BaseTackerTest):
 
         if template_source == 'inline':
             # create vnf directly from template
-            template = yaml.load(values_str)
+            template = yaml.safe_load(values_str)
             vnf_arg = {'vnf': {'vnfd_template': template, 'name': vnf_name}}
             vnf_instance = self.client.create_vnf(body=vnf_arg)
             vnfd_id = vnf_instance['vnf']['vnfd_id']
@@ -63,14 +64,14 @@ class VnfTestToscaCreate(base.BaseTackerTest):
         vnf_show_out = self.client.show_vnf(vnf_id)['vnf']
         self.assertIsNotNone(vnf_show_out['mgmt_url'])
 
-        input_dict = yaml.load(values_str)
+        input_dict = yaml.safe_load(values_str)
         prop_dict = input_dict['topology_template']['node_templates'][
             'CP1']['properties']
 
         # Verify if ip_address is static, it is same as in show_vnf
         if prop_dict.get('ip_address'):
             mgmt_url_input = prop_dict.get('ip_address')
-            mgmt_info = yaml.load(
+            mgmt_info = yaml.safe_load(
                 vnf_show_out['mgmt_url'])
             self.assertEqual(mgmt_url_input, mgmt_info['VDU1'])
 
@@ -208,6 +209,8 @@ class VnfTestToscaCreateFlavorCreation(base.BaseTackerTest):
 
 
 class VnfTestToscaCreateImageCreation(base.BaseTackerTest):
+
+    @unittest.skip("Until BUG 1673099")
     def test_create_delete_vnf_tosca_no_monitoring(self):
         vnfd_name = 'tosca_vnfd_with_auto_image'
         input_yaml = read_file('sample-tosca-vnfd-image.yaml')

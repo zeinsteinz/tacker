@@ -18,6 +18,15 @@ topology_template:
           param0: key1
           param1: key2
         mgmt_driver: noop
+        monitoring_policy:
+          name: ping
+          actions:
+            failure: respawn
+          parameters:
+            count: 3
+            interval: 10
+            monitoring_delay: 45
+            timeout: 2
 
     CP11:
       type: tosca.nodes.nfv.CP.Tacker
@@ -60,6 +69,15 @@ topology_template:
         config: |
           param0: key1
           param1: key2
+        monitoring_policy:
+          name: ping
+          actions:
+            failure: respawn
+          parameters:
+            count: 3
+            interval: 10
+            monitoring_delay: 45
+            timeout: 2
 
     CP21:
       type: tosca.nodes.nfv.CP.Tacker

@@ -11,22 +11,27 @@
 #    under the License.
 
 import os
+
 from oslo_config import cfg
 from toscaparser import tosca_template
+import unittest
 import yaml
+
 
 from tacker.common import utils
 from tacker.plugins.common import constants as evt_constants
 from tacker.tests import constants
 from tacker.tests.functional import base
 from tacker.tests.utils import read_file
-from tacker.vnfm.tosca import utils as toscautils
+from tacker.tosca import utils as toscautils
 
 CONF = cfg.CONF
 SOFTWARE_DEPLOYMENT = 'OS::Heat::SoftwareDeployment'
 
 
 class VnfTestToscaVNFC(base.BaseTackerTest):
+
+    @unittest.skip("Until BUG 1673012")
     def test_create_delete_tosca_vnfc(self):
         input_yaml = read_file('sample_tosca_vnfc.yaml')
         tosca_dict = yaml.safe_load(input_yaml)
@@ -68,9 +73,9 @@ class VnfTestToscaVNFC(base.BaseTackerTest):
         # Validate mgmt_url with input yaml file
         mgmt_url = self.client.show_vnf(vnf_id)['vnf']['mgmt_url']
         self.assertIsNotNone(mgmt_url)
-        mgmt_dict = yaml.load(str(mgmt_url))
+        mgmt_dict = yaml.safe_load(str(mgmt_url))
 
-        input_dict = yaml.load(input_yaml)
+        input_dict = yaml.safe_load(input_yaml)
         toscautils.updateimports(input_dict)
 
         tosca = tosca_template.ToscaTemplate(parsed_params={}, a_file=False,

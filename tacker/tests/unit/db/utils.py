@@ -18,10 +18,13 @@ import os
 import yaml
 
 
+DUMMY_NS_2_NAME = 'dummy_ns_2'
+
+
 def _get_template(name):
     filename = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
-        "../vm/infra_drivers/openstack/data/", name)
+        "../vnfm/infra_drivers/openstack/data/", name)
     f = codecs.open(filename, encoding='utf-8', errors='strict')
     return f.read()
 
@@ -29,18 +32,19 @@ tosca_vnfd_openwrt = _get_template('test_tosca_openwrt.yaml')
 config_data = _get_template('config_data.yaml')
 update_config_data = _get_template('update_config_data.yaml')
 vnffg_params = _get_template('vnffg_params.yaml')
-vnffgd_template = yaml.load(_get_template('vnffgd_template.yaml'))
-vnffgd_tosca_template = yaml.load(_get_template('tosca_vnffgd_template.yaml'))
-vnffgd_tosca_param_template = yaml.load(_get_template(
+vnffgd_template = yaml.safe_load(_get_template('vnffgd_template.yaml'))
+vnffgd_tosca_template = yaml.safe_load(_get_template(
+    'tosca_vnffgd_template.yaml'))
+vnffgd_tosca_param_template = yaml.safe_load(_get_template(
     'tosca_vnffgd_param_template.yaml'))
-vnffgd_invalid_tosca_template = yaml.load(_get_template(
+vnffgd_invalid_tosca_template = yaml.safe_load(_get_template(
     'tosca_invalid_vnffgd_template.yaml'))
 vnfd_scale_tosca_template = _get_template('tosca_scale.yaml')
 vnfd_alarm_respawn_tosca_template = _get_template(
     'test_tosca_vnfd_alarm_respawn.yaml')
 vnfd_alarm_scale_tosca_template = _get_template(
     'test_tosca_vnfd_alarm_scale.yaml')
-nsd_tosca_template = yaml.load(_get_template('tosca_nsd_template.yaml'))
+nsd_tosca_template = yaml.safe_load(_get_template('tosca_nsd_template.yaml'))
 
 
 def get_dummy_vnfd_obj():
@@ -209,6 +213,18 @@ def get_dummy_ns_obj():
                    'vim_id': u'6261579e-d6f3-49ad-8bc3-a9cb974778ff',
                    'tenant_id': u'ad7ebc56538745a08ef7c5e97f8bd437',
                    'name': 'dummy_ns',
+                   'attributes': {
+                       'param_values': {'nsd': {'vl1_name': 'net_mgmt',
+                                                'vl2_name': 'net0'}}}}}
+
+
+def get_dummy_ns_obj_2():
+    return {'ns': {'description': 'dummy_ns_description',
+                   'id': u'ba6bf017-f6f7-45f1-a280-57b073bf78ea',
+                   'nsd_id': u'eb094833-995e-49f0-a047-dfb56aaf7c4e',
+                   'vim_id': u'6261579e-d6f3-49ad-8bc3-a9cb974778ff',
+                   'tenant_id': u'ad7ebc56538745a08ef7c5e97f8bd437',
+                   'name': DUMMY_NS_2_NAME,
                    'attributes': {
                        'param_values': {'nsd': {'vl1_name': 'net_mgmt',
                                                 'vl2_name': 'net0'}}}}}

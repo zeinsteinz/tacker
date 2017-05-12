@@ -13,13 +13,14 @@
 #    under the License.
 
 import os
-import testtools
+import unittest
 
+import testtools
 from toscaparser import tosca_template
 from toscaparser.utils import yamlparser
-
-from tacker.vnfm.tosca import utils
 from translator.hot import tosca_translator
+
+from tacker.tosca import utils
 
 
 class TestSamples(testtools.TestCase):
@@ -33,7 +34,7 @@ class TestSamples(testtools.TestCase):
     def _get_list_of_sample(self, tosca_files):
         if tosca_files:
             base_path = (os.path.dirname(os.path.abspath(__file__)) +
-                         '/../../../../samples/tosca-templates/vnfd/')
+                         '/../../../samples/tosca-templates/vnfd/')
             if isinstance(tosca_files, list):
                 list_of_samples = []
                 for tosca_file in tosca_files:
@@ -79,12 +80,15 @@ class TestSamples(testtools.TestCase):
                         hot,
                         "Heat-translator failed to translate %s" % f)
 
+    @unittest.skip("Related Bug 1682098")
     def test_scale_sample(self, tosca_file=['tosca-vnfd-scale.yaml']):
         self._test_samples(tosca_file)
 
+    @unittest.skip("Related Bug 1682098")
     def test_alarm_sample(self, tosca_file=['tosca-vnfd-alarm-scale.yaml']):
         self._test_samples(tosca_file)
 
+    @unittest.skip("Related Bug 1682098")
     def test_list_samples(self,
                           files=['tosca-vnfd-scale.yaml',
                                  'tosca-vnfd-alarm-scale.yaml']):
