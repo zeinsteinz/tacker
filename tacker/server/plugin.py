@@ -23,8 +23,6 @@ from tacker.db.nfvo import vnffg_db
 from tacker.extensions import nfvo
 from tacker import manager
 from tacker.plugins.common import constants
-from tacker.vnfm.tosca import utils as toscautils
-from toscaparser import tosca_template
 from tacker.db.server import server_db
 
 # server status
@@ -39,7 +37,6 @@ LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 class ServerPlugin(server_db.ServerPluginDb):
-
     supported_extension_aliases = ['server']
     _lock = threading.RLock()
 

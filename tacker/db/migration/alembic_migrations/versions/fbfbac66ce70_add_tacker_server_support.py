@@ -16,14 +16,14 @@
 """add tacker server support
 
 Revision ID: fbfbac66ce70
-Revises: ef14f8026327
+Revises: c256228ed37c
 Create Date: 2017-02-23 14:45:02.275730
 
 """
 
 # revision identifiers, used by Alembic.
 revision = 'fbfbac66ce70'
-down_revision = 'ef14f8026327'
+down_revision = 'c256228ed37c'
 
 from alembic import op
 import sqlalchemy as sa

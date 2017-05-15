@@ -181,12 +181,12 @@ def load_class_by_alias_or_classname(namespace, name):
     :returns: class if calls can be loaded
     :raises ImportError: if class cannot be loaded
     """
-
     if not name:
         LOG.error("Alias or class name is not set")
         raise ImportError(_("Class not found."))
     try:
         # Try to resolve class by alias
+        LOG.info("enter 222222222222222222222224 %s %s",namespace, name)
         mgr = driver.DriverManager(namespace, name)
         class_to_load = mgr.driver
     except RuntimeError:
@@ -194,7 +194,7 @@ def load_class_by_alias_or_classname(namespace, name):
         # Fallback to class name
         try:
             class_to_load = importutils.import_class(name)
-        except (ImportError, ValueError):
+        except (ImportError, ValueError):            
             LOG.error("Error loading class by alias",
                       exc_info=e1_info)
             LOG.error("Error loading class by class name",
