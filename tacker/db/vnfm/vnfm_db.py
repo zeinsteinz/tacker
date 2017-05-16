@@ -78,7 +78,8 @@ class VNFD(model_base.BASE, models_v1.HasId, models_v1.HasTenant,
         schema.UniqueConstraint(
             "tenant_id",
             "name",
-            name="uniq_vnfd0tenant_id0name"),
+            "deleted_at",
+            name="uniq_vnfd0tenant_id0name0deleted_at"),
     )
 
 
@@ -143,7 +144,8 @@ class VNF(model_base.BASE, models_v1.HasId, models_v1.HasTenant,
         schema.UniqueConstraint(
             "tenant_id",
             "name",
-            name="uniq_vnf0tenant_id0name"),
+            "deleted_at",
+            name="uniq_vnf0tenant_id0name0deleted_at"),
     )
 
 
@@ -257,7 +259,8 @@ class VNFMPluginDb(vnfm.VNFMPluginBase, db_base.CommonDbMixin):
                     name=vnfd.get('name'),
                     description=vnfd.get('description'),
                     mgmt_driver=mgmt_driver,
-                    template_source=template_source)
+                    template_source=template_source,
+                    deleted_at=None)
                 context.session.add(vnfd_db)
                 for (key, value) in vnfd.get('attributes', {}).items():
                     attribute_db = VNFDAttribute(

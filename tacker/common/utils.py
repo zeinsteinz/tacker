@@ -186,12 +186,12 @@ def load_class_by_alias_or_classname(namespace, name):
         raise ImportError(_("Class not found."))
     try:
         # Try to resolve class by alias
-        LOG.info("enter 222222222222222222222224 %s %s",namespace, name)
         mgr = driver.DriverManager(namespace, name)
         class_to_load = mgr.driver
-    except RuntimeError:
+    except: #RuntimeError
         e1_info = sys.exc_info()
         # Fallback to class name
+        LOG.info(e1_info)
         try:
             class_to_load = importutils.import_class(name)
         except (ImportError, ValueError):            
