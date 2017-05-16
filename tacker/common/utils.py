@@ -25,6 +25,7 @@ import signal
 import socket
 import string
 import sys
+import pkg_resources
 
 from eventlet.green import subprocess
 import netaddr
@@ -186,7 +187,6 @@ def load_class_by_alias_or_classname(namespace, name):
         raise ImportError(_("Class not found."))
     try:
         # Try to resolve class by alias
-        LOG.info("namespace: %s; name: %s", namespace, name)
         mgr = driver.DriverManager(namespace, name)
         class_to_load = mgr.driver
     except RuntimeError: #RuntimeError

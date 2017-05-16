@@ -59,7 +59,6 @@ class Server(extensions.ExtensionDescriptor):
 
 
 @six.add_metaclass(abc.ABCMeta)
-
 class ServerPluginBase(service_base.NFVPluginBase):
     def get_plugin_name(self):
         return constants.SERVER

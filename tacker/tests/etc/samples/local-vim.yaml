@@ -1,4 +1,4 @@
-auth_url: http://127.0.0.1:5000
+auth_url: 'http://137.194.165.140/identity'
 username: nfv_user
 password: devstack
 project_name: nfv
