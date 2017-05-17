@@ -36,6 +36,9 @@ ROLE_NORMAL = "normal"
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
+def config_opts():
+    return [('tacker_server', ServerPlugin.OPTS)]
+
 class ServerPlugin(server_db.ServerPluginDb):
     supported_extension_aliases = ['server']
     _lock = threading.RLock()
