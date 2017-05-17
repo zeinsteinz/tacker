@@ -38,6 +38,8 @@ if is_service_enabled tacker; then
             tacker_check_and_download_images
             echo_summary "Registering default VIM"
             tacker_register_default_vim
+	elif [[ "${TACKER_MODE}" == "standalone" ]]; then
+            tacker_register_default_vim
         fi
     fi
 
