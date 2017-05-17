@@ -16,6 +16,7 @@ tacker.vnfm.monitor_drivers.ceilometer.ceilometer = tacker.vnfm.monitor_drivers.
 tacker.vnfm.monitor_drivers.http_ping.http_ping = tacker.vnfm.monitor_drivers.http_ping.http_ping:config_opts
 tacker.vnfm.monitor_drivers.ping.ping = tacker.vnfm.monitor_drivers.ping.ping:config_opts
 tacker.vnfm.plugin = tacker.vnfm.plugin:config_opts
+tacker.server.plugin = tacker.server.plugin:config_opts
 tacker.wsgi = tacker.wsgi:config_opts
 
 [tacker.nfvo.vim.drivers]
