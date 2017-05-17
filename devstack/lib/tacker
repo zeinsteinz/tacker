@@ -406,7 +406,7 @@ function tacker_register_default_vim {
     get_or_add_user_project_role "admin" $DEFAULT_VIM_USER $DEFAULT_VIM_PROJECT_NAME
     get_or_add_user_project_role "advsvc" $DEFAULT_VIM_USER $DEFAULT_VIM_PROJECT_NAME
 
-    echo "Register default VIM ..."
+    #echo "Register default VIM ..."
     mkdir -p $DATA_DIR/tacker
     cp $TACKER_DIR/devstack/vim_config.yaml $DATA_DIR/tacker
     VIM_CONFIG_FILE="$DATA_DIR/tacker/vim_config.yaml"
@@ -414,10 +414,10 @@ function tacker_register_default_vim {
     echo "The content of VIM config file $VIM_CONFIG_FILE :"
     cat $VIM_CONFIG_FILE
 
-    local default_vim_id
-    DEFAULT_VIM_NAME="VIM0"
-    default_vim_id=$(tacker vim-register --is-default --description "Default VIM" --config-file $VIM_CONFIG_FILE $DEFAULT_VIM_NAME -c id | grep id | awk '{print $4}')
-    echo "Default VIM registration done as $default_vim_id at $KEYSTONE_SERVICE_URI."
+    #local default_vim_id
+    #DEFAULT_VIM_NAME="VIM0"
+    #default_vim_id=$(tacker vim-register --is-default --description "Default VIM" --config-file $VIM_CONFIG_FILE $DEFAULT_VIM_NAME -c id | grep id | awk '{print $4}')
+    #echo "Default VIM registration done as $default_vim_id at $KEYSTONE_SERVICE_URI."
 
     echo "Update tacker/tests/etc/samples/local-vim.yaml for functional testing"
     functional_vim_file="$TACKER_DIR/tacker/tests/etc/samples/local-vim.yaml"
