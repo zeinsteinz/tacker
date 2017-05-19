@@ -35,7 +35,7 @@ from tacker.extensions import server
 from tacker import manager
 from tacker.plugins.common import constants
 from tacker.services import service_base
-from tacker.common import get_hostname
+from tacker.common.utils import get_hostname
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
