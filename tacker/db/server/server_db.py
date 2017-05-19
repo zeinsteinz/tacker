@@ -35,6 +35,7 @@ from tacker.extensions import server
 from tacker import manager
 from tacker.plugins.common import constants
 from tacker.services import service_base
+from tacker.common import get_hostname
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -82,7 +83,7 @@ class ServerPluginDb(service_base.NFVPluginBase, db_base.CommonDbMixin):
                 id=cfg.CONF.uuid,
                 status="active",
                 role="normal",
-                description="http://" + cfg.CONF.bind_host + ":" + str(cfg.CONF.bind_port),
+                description="hostname: " + get_hostname(),
                 updated_at=timeutils.utcnow(),
                 created_at=timeutils.utcnow())
             context.session.add(server_db)
